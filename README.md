@@ -4,6 +4,8 @@ This portfolio demo uses **fictional data only** to show a small research workfl
 
 ## See the examples
 
+For a plain-language visual walkthrough aimed at research colleagues and interview panels, open [`docs/portfolio_demo.html`](docs/portfolio_demo.html). It includes charts, simulated examples, a legend, and a short interview explanation in Norwegian.
+
 | Skill | Demo |
 |---|---|
 | Online experiment | Synthetic savings study: control, human-advice, and AI-advice groups; attention and time checks; differences with 95% confidence intervals |

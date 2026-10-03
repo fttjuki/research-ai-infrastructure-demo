@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Et lite eksempel på AI-støttet forskning</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172b3a;
+      --muted: #526473;
+      --line: #d7e0e5;
+      --paper: #f5f8fa;
+      --white: #fff;
+      --navy: #183a56;
+      --teal: #087f75;
+      --orange: #b45b22;
+      --pale-teal: #e9f5f3;
+      --pale-orange: #fff3e8;
+      --pale-blue: #edf3f8;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: #075c79; }
+    .page { max-width: 1040px; margin: 0 auto; padding: 28px 20px 60px; }
+    header { padding: 34px; color: white; background: var(--navy); border-radius: 18px; }
+    header p { max-width: 760px; color: #e5eef4; margin-bottom: 0; }
+    .eyebrow { font-size: .83rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #b8d9e5; }
+    h1 { margin: 8px 0 12px; font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.12; }
+    h2 { margin: 0 0 12px; font-size: 1.55rem; line-height: 1.25; }
+    h3 { margin: 0 0 6px; font-size: 1.05rem; }
+    p { margin: 8px 0 12px; }
+    .notice { margin: 18px 0 26px; padding: 16px 18px; border-left: 5px solid var(--orange); border-radius: 8px; background: var(--pale-orange); }
+    .notice strong { display: block; margin-bottom: 3px; }
+    section { margin-top: 28px; padding: 24px; border: 1px solid var(--line); border-radius: 14px; background: var(--white); }
+    .sub { color: var(--muted); max-width: 780px; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 18px 0; }
+    .stat { padding: 16px; border-radius: 10px; background: var(--pale-blue); }
+    .stat strong { display: block; font-size: 1.8rem; line-height: 1.2; }
+    .stat span { color: var(--muted); }
+    .flow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 20px; }
+    .flow-step { position: relative; min-height: 118px; padding: 14px; border-radius: 10px; background: var(--pale-blue); }
+    .flow-step b { display: block; margin: 3px 0 5px; }
+    .step-no { display: inline-grid; place-items: center; width: 27px; height: 27px; border-radius: 50%; color: #fff; background: var(--navy); font-weight: 700; }
+    .legend { display: flex; flex-wrap: wrap; gap: 10px 18px; padding: 0; margin: 14px 0; list-style: none; color: var(--muted); }
+    .legend li { display: flex; align-items: center; gap: 7px; }
+    .swatch { width: 14px; height: 14px; display: inline-block; border-radius: 3px; }
+    .control { background: var(--navy); }
+    .human { background: var(--teal); }
+    .ai { background: var(--orange); }
+    .bars { display: grid; gap: 16px; max-width: 760px; margin-top: 20px; }
+    .bar-row { display: grid; grid-template-columns: 116px minmax(90px, 1fr) 155px; align-items: center; gap: 12px; }
+    .bar-label { font-weight: 650; }
+    .track { height: 24px; overflow: hidden; border-radius: 4px; background: #e7edf1; }
+    .bar { height: 100%; border-radius: 4px; }
+    .bar-value { font-variant-numeric: tabular-nums; font-weight: 650; }
+    .caption { margin-top: 12px; color: var(--muted); font-size: .92rem; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .mini { padding: 18px; border-radius: 10px; background: var(--pale-blue); }
+    .mini.teal { background: var(--pale-teal); }
+    table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+    th, td { padding: 9px 10px; border-bottom: 1px solid var(--line); text-align: left; }
+    th { color: var(--muted); font-size: .9rem; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .batch { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: stretch; gap: 10px; margin-top: 18px; }
+    .batch-box { padding: 16px; border-radius: 10px; background: var(--pale-blue); }
+    .batch-box b { display: block; font-size: 1.25rem; }
+    .arrow { align-self: center; color: var(--muted); font-size: 1.5rem; }
+    .timeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 18px; }
+    .phase { border-top: 4px solid var(--teal); padding: 12px; background: #f6faf9; }
+    .phase .week { color: var(--teal); font-weight: 700; }
+    .phase p { font-size: .93rem; }
+    .quote { padding: 18px 20px; border-left: 5px solid var(--teal); background: var(--pale-teal); border-radius: 8px; }
+    .small { color: var(--muted); font-size: .9rem; }
+    code { padding: 2px 5px; border-radius: 4px; background: #edf1f3; font-size: .93em; }
+    footer { margin-top: 24px; color: var(--muted); font-size: .9rem; }
+    @media (max-width: 720px) {
+      .flow { grid-template-columns: 1fr 1fr; }
+      .flow-step:last-child { grid-column: span 2; }
+      .timeline { grid-template-columns: 1fr 1fr; }
+      .two-col { grid-template-columns: 1fr; }
+      .batch { grid-template-columns: 1fr; }
+      .arrow { justify-self: center; transform: rotate(90deg); }
+    }
+    @media (max-width: 480px) {
+      .page { padding: 14px 12px 36px; }
+      header, section { padding: 19px; border-radius: 12px; }
+      .stats { gap: 7px; }
+      .stat { padding: 11px; }
+      .stat strong { font-size: 1.45rem; }
+      .bar-row { grid-template-columns: 88px minmax(48px, 1fr); gap: 8px; }
+      .bar-value { grid-column: 2; margin-top: -7px; font-size: .9rem; }
+      .timeline { grid-template-columns: 1fr; }
+      table { font-size: .9rem; }
+      th, td { padding: 7px 5px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <div class="eyebrow">BRIDGE AI Lab · portfolio-demo</div>
+      <h1>Et lite eksempel på AI-støttet forskning</h1>
+      <p>En enkel forklaring på hvordan et forskningsprosjekt kan gå fra planlegging til data, kontroll og rapportering.</p>
+    </header>
+
+    <div class="notice" role="note">
+      <strong>Viktig: Alle tall og svar her er syntetiske.</strong>
+      Ingen ekte deltakere er rekruttert. AI-etikettene og batch-jobbene er simulert. Siden viser en arbeidsmåte, ikke forskningsresultater om virkelige mennesker.
+    </div>
+
+    <section aria-labelledby="overview-title">
+      <h2 id="overview-title">Eksempel: en fiktiv spareundersøkelse</h2>
+      <p class="sub">Spørsmålet er om et AI-råd påvirker hvor mye en person velger å spare i en tenkt oppgave. Deltakerne blir tilfeldig fordelt i tre grupper.</p>
+      <div class="stats" aria-label="Antall syntetiske observasjoner">
+        <div class="stat"><strong>60</strong><span>fiktive deltakere</span></div>
+        <div class="stat"><strong>53</strong><span>med i eksempelanalysen</span></div>
+        <div class="stat"><strong>7</strong><span>utenfor analysen etter reglene</span></div>
+      </div>
+      <div class="flow" aria-label="Fem trinn i eksempelprosjektet">
+        <div class="flow-step"><span class="step-no">1</span><b>Planlegg</b><span>Bestem spørsmål og regler før dataene ses.</span></div>
+        <div class="flow-step"><span class="step-no">2</span><b>Fordel grupper</b><span>Control, human advice og AI advice.</span></div>
+        <div class="flow-step"><span class="step-no">3</span><b>Sjekk data</b><span>Kontroller samtykke, svar og tid.</span></div>
+        <div class="flow-step"><span class="step-no">4</span><b>Analyser</b><span>Beregn gjennomsnitt og gruppeforskjeller.</span></div>
+        <div class="flow-step"><span class="step-no">5</span><b>Dokumenter</b><span>Lagre kode, regler og resultat hver for seg.</span></div>
+      </div>
+    </section>
+
+    <section aria-labelledby="chart-title">
+      <h2 id="chart-title">Hvor mye valgte gruppene å spare?</h2>
+      <p class="sub">Søylene viser gjennomsnittet i de 53 inkluderte, fiktive svarene. Beløpene er norske kroner.</p>
+      <ul class="legend" aria-label="Forklaring til gruppene">
+        <li><span class="swatch control"></span>Control: ingen råd</li>
+        <li><span class="swatch human"></span>Human: råd merket som skrevet av et menneske</li>
+        <li><span class="swatch ai"></span>AI: råd merket som AI-generert</li>
+      </ul>
+      <figure role="img" aria-label="Gjennomsnittlig syntetisk sparebeløp: control 272 kroner, human 271 kroner og AI 387 kroner">
+        <div class="bars">
+          <div class="bar-row"><span class="bar-label">Control</span><div class="track"><div class="bar control" style="width:54.46%"></div></div><span class="bar-value">272 kr · n=17</span></div>
+          <div class="bar-row"><span class="bar-label">Human</span><div class="track"><div class="bar human" style="width:54.236%"></div></div><span class="bar-value">271 kr · n=17</span></div>
+          <div class="bar-row"><span class="bar-label">AI</span><div class="track"><div class="bar ai" style="width:77.452%"></div></div><span class="bar-value">387 kr · n=19</span></div>
+        </div>
+        <figcaption class="caption">I denne simuleringen ligger AI-gruppen høyere. Det betyr ikke at et AI-råd faktisk får mennesker til å spare mer; tallene er laget for å demonstrere analyseflyten.</figcaption>
+      </figure>
+      <div class="two-col">
+        <div class="mini"><h3>Hvordan ble dataene sjekket?</h3><p>Reglene sier at et svar bare blir med hvis samtykke og kvalifikasjon er på plass, oppmerksomhetstesten er bestått, og svaret tok minst 120 sekunder.</p></div>
+        <div class="mini teal"><h3>Hva betyr usikkerheten?</h3><p>AI minus control er omtrent 115 kr i denne simuleringen. Et 95 % konfidensintervall går fra omtrent 22 til 208 kr. Det brede intervallet viser at et lite utvalg gir et usikkert anslag.</p></div>
+      </div>
+      <p class="caption">Konfidensintervallet er et statistisk usikkerhetsmål fra en enkel lineær regresjon. Det gjør ikke syntetiske tall til bevis om virkelige deltakere.</p>
+    </section>
+
+    <section aria-labelledby="repro-title">
+      <h2 id="repro-title">Slik kan arbeidet gjentas og kontrolleres</h2>
+      <div class="two-col">
+        <div>
+          <h3>Planen kommer først</h3>
+          <p>Før analysen bestemmes spørsmålet, hovedmålet og reglene for hvilke svar som skal tas med. Det gjør det lettere å forklare hvorfor analysen ble gjort slik.</p>
+          <p><strong>I eksempelet:</strong> Sammenlign gjennomsnittlig sparebeløp i AI-gruppen med control-gruppen.</p>
+        </div>
+        <div>
+          <h3>Originaldata holdes i ro</h3>
+          <p>Den syntetiske originalfilen endres ikke av analysen. En kontrollsum viser om filen er blitt endret. Rensede data lagres i en egen fil.</p>
+          <p><strong>Variabelliste:</strong> forklarer hva <code>arm</code>, <code>saved_nok</code>, <code>attention</code> og <code>seconds</code> betyr.</p>
+        </div>
+      </div>
+      <p class="small">Dette demonstrerer dokumentasjon og datarutiner. Det er ikke en godkjenning for å lagre ekte personopplysninger i et offentlig GitHub-repositorium.</p>
+    </section>
+
+    <section aria-labelledby="llm-title">
+      <h2 id="llm-title">Hvordan sjekke om AI-merking stemmer?</h2>
+      <p class="sub">Tjue korte, fiktive svar har en referanseetikett laget for testen og en simulert modell-etikett. Ingen ekte AI ble brukt til disse etikettene.</p>
+      <div class="two-col">
+        <div class="mini teal"><strong style="font-size:1.7rem">18 av 20 · 90 %</strong><p>Andelen der de to etikettene er like.</p></div>
+        <div class="mini"><strong style="font-size:1.7rem">Cohen’s κ = 0,861</strong><p>Kappa justerer enigheten for hvor ofte to etiketter kan bli like ved tilfeldighet.</p></div>
+      </div>
+      <table>
+        <caption class="caption" style="text-align:left">Forvekslingsmatrise: radene er menneskets referanse; kolonnene er simulert modellmerking.</caption>
+        <thead><tr><th scope="col">Referanse</th><th scope="col" class="num">Trust</th><th scope="col" class="num">Price</th><th scope="col" class="num">Habit</th><th scope="col" class="num">Other</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Trust</th><td class="num">6</td><td class="num">0</td><td class="num">0</td><td class="num">1</td></tr>
+          <tr><th scope="row">Price</th><td class="num">0</td><td class="num">6</td><td class="num">0</td><td class="num">0</td></tr>
+          <tr><th scope="row">Habit</th><td class="num">0</td><td class="num">0</td><td class="num">5</td><td class="num">0</td></tr>
+          <tr><th scope="row">Other</th><td class="num">0</td><td class="num">1</td><td class="num">0</td><td class="num">1</td></tr>
+        </tbody>
+      </table>
+      <p class="caption">I et ekte prosjekt bør flere svar kodes av mennesker, uenigheter gjennomgås, og usikkerhet rapporteres. Dette lille eksempelet viser bare hvordan målene regnes ut.</p>
+    </section>
+
+    <section aria-labelledby="batch-title">
+      <h2 id="batch-title">Hva skjer hvis en stor jobb stopper?</h2>
+      <p class="sub">Batch betyr at mange tekster behandles automatisk, i stedet for én om gangen for hånd. Her simuleres 100 tekster og to midlertidige feil.</p>
+      <div class="batch" aria-label="Batch-prosessen i to kjøringer">
+        <div class="batch-box"><b>Første kjøring</b><span>45 forsøkt<br>43 fullført<br>2 midlertidige feil</span></div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="batch-box"><b>Start på nytt</b><span>Fortsetter der den stoppet<br>hopper over ferdige svar<br>prøver de 2 feilene igjen</span></div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="batch-box"><b>Etterpå</b><span>100 fullført<br>0 ventende feil<br>anslått kostnad: $0,102*</span></div>
+      </div>
+      <p class="caption">* Bare en fiktiv beregning i testen: $0,001 per forsøk. Den stopper før neste simulerte kall hvis den lokale grensen overskrides. Det er ikke en ekte faktura eller en leverandørstyrt kostnadsgrense.</p>
+    </section>
+
+    <section aria-labelledby="coord-title">
+      <h2 id="coord-title">Eksempel på plan for gjennomføring</h2>
+      <p class="sub">En lab manager hjelper flere personer med å vite hva som skjer, hvem som gjør det og hva som må være klart før neste trinn.</p>
+      <div class="timeline">
+        <div class="phase"><div class="week">Uke 1</div><h3>Plan</h3><p>Forskningsleder og lab manager avtaler spørsmål, mål og regler.</p></div>
+        <div class="phase"><div class="week">Uke 2–3</div><h3>Test og pilot</h3><p>Surveyansvarlig tester lenker og spørreskjema; 30-personers pilot er planlagt.</p></div>
+        <div class="phase"><div class="week">Uke 4–6</div><h3>Rekrutter og sjekk</h3><p>Kontaktperson følger rekruttering; dataansvarlig sjekker eksport og dokumentasjon.</p></div>
+        <div class="phase"><div class="week">Uke 7–8</div><h3>Analyser og del</h3><p>Analytiker lager resultater; forskningsleder godkjenner formidling.</p></div>
+      </div>
+      <p class="caption">Hvis pilotdata viser en feil, stoppes neste fase til spørreskjemaet er rettet. Endringer i regler dokumenteres før hovedanalysen.</p>
+    </section>
+
+    <section aria-labelledby="scope-title">
+      <h2 id="scope-title">Hva demonstrasjonen viser – og ikke viser</h2>
+      <div class="two-col">
+        <div class="mini teal"><h3>Dette kan kjøres lokalt</h3><p>Rensing og oppsummering av syntetiske data, beregning av samsvarsmål, test av feil og gjenopptakelse, samt automatiske programtester.</p></div>
+        <div class="mini"><h3>Dette er ikke koblet opp</h3><p>Ingen ekte Qualtrics-survey, ingen rekruttering eller betaling i Prolific, ingen ekte AI-merking av de 20 tekstene og ingen universitetsserver.</p></div>
+      </div>
+      <p>Eksempelet bruker Python, API-struktur, dokumentasjon, tester og GitHub. Ekte persondata må lagres og behandles i systemer som institusjonen har godkjent.</p>
+    </section>
+
+    <section aria-labelledby="interview-title">
+      <h2 id="interview-title">En kort forklaring du kan bruke i intervjuet</h2>
+      <div class="quote" lang="nb">
+        «Jeg har laget en liten demonstrasjon med syntetiske data. Den viser hvordan jeg ville planlagt en enkel studie, dokumentert dataene, kontrollert kvaliteten og gjort analysen mulig å gjenta. Jeg har også simulert AI-merking og en større batch-jobb med feil og gjenopptakelse. Det er ikke et ferdig produksjonssystem, men det viser hvordan jeg tenker rundt forskningsstøtte, personvern og drift.»
+      </div>
+    </section>
+
+    <footer>
+      Laget som en portfolio-demo for Research Lab Manager. Tallene kommer fra syntetiske filer i dette repositoriet. Se også <a href="preregistration.md">analyseplanen</a>, <a href="project_coordination.md">prosjektplanen</a> og <a href="user_guide.md">nybegynnerguiden</a>.
+    </footer>
+  </main>
+</body>
+</html>
