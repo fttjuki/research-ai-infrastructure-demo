@@ -1,0 +1,31 @@
+{
+  "study": "Fictional savings experiment; synthetic data only",
+  "raw_file_sha256": "3bd3558e83ce703fc2fd9404f2427f41daf130b50cc185f99833b0540000d30f",
+  "n_raw": 60,
+  "n_included": 53,
+  "n_excluded": 7,
+  "exclusion_counts_overlap_possible": {
+    "attention_fail": 4,
+    "under_120_seconds": 3
+  },
+  "rule": "Include consent=yes, eligible=yes, attention=pass, and seconds>=120",
+  "groups": {
+    "control": {
+      "n": 17,
+      "mean_saved_nok": 272.29
+    },
+    "human": {
+      "n": 17,
+      "mean_saved_nok": 271.18
+    },
+    "ai": {
+      "n": 19,
+      "mean_saved_nok": 387.26
+    }
+  },
+  "ols_point_estimates_nok_vs_control": {
+    "human_minus_control": -1.11,
+    "ai_minus_control": 114.97
+  },
+  "interpretation_note": "Synthetic demonstration only; estimates are not evidence about real people."
+}

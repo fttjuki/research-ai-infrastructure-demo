@@ -57,6 +57,10 @@ def run_demo(*, live_llm: bool = False, create_draft: bool = False) -> list[dict
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Synthetic research API demo")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--run-experiment", action="store_true", help="clean and summarize the synthetic savings experiment")
+    mode.add_argument("--evaluate-labels", action="store_true", help="compare synthetic AI labels with human reference labels")
+    mode.add_argument("--batch-demo", action="store_true", help="run a resumable 100-record batch simulation")
     parser.add_argument("--live-llm", action="store_true", help="call OpenAI for synthetic snippets")
     parser.add_argument(
         "--create-prolific-draft",
@@ -65,6 +69,19 @@ def main() -> None:
     )
     args = parser.parse_args()
     try:
+        if args.run_experiment:
+            from .experiment import run_experiment
+            print(json.dumps(run_experiment(), ensure_ascii=False, indent=2))
+            return
+        if args.evaluate_labels:
+            from .evaluation import evaluate_file
+            print(json.dumps(evaluate_file(), ensure_ascii=False, indent=2))
+            return
+        if args.batch_demo:
+            from .batch import run_demo as run_batch_demo
+            for event in run_batch_demo():
+                print(json.dumps(event, ensure_ascii=False))
+            return
         for event in run_demo(live_llm=args.live_llm, create_draft=args.create_prolific_draft):
             print(json.dumps(event, ensure_ascii=False))
     except (APIError, ValueError) as exc:

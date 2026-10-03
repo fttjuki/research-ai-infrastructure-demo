@@ -1,0 +1,10 @@
+variable,meaning,type,allowed_values_or_range,privacy_note
+participant_id,Synthetic participant code,text,SYN-001 to SYN-060,Fictional ID; no identity mapping exists
+consent,Simulated consent status,category,yes/no,Demo only
+eligible,Simulated eligibility status,category,yes/no,Demo only
+arm,Randomly assigned experiment group,category,control/human/ai,Synthetic assignment
+saved_nok,Amount saved in fictional task,integer,0-1000 NOK,Synthetic outcome
+attention,Attention-check result,category,pass/fail,Synthetic quality flag
+seconds,Time spent on fictional survey,integer,>=0 seconds,Synthetic duration
+included,Whether the pre-registered rules include this row,category,yes/no,Derived by analysis script
+exclusion_reason,Reason for exclusion,text,attention_fail and/or under_120_seconds,Derived by analysis script

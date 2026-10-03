@@ -1,0 +1,21 @@
+record_id,text,human_label,model_label
+TXT-001,"The advice helped me feel confident.",trust,trust
+TXT-002,"I chose the lowest monthly fee.",price,price
+TXT-003,"I usually save this way every month.",habit,habit
+TXT-004,"The suggestion seemed reliable.",trust,trust
+TXT-005,"I compared the interest rates first.",price,price
+TXT-006,"This is how my family has always done it.",habit,habit
+TXT-007,"I did not have another reason.",other,other
+TXT-008,"I trusted the recommendation.",trust,trust
+TXT-009,"The cost was the deciding factor.",price,price
+TXT-010,"I follow the same routine each payday.",habit,habit
+TXT-011,"The AI explanation was convincing.",trust,trust
+TXT-012,"I wanted the option with fewer fees.",price,price
+TXT-013,"The advice helped me feel confident.",trust,trust
+TXT-014,"I chose the lowest monthly fee.",price,price
+TXT-015,"I usually save this way every month.",habit,habit
+TXT-016,"The suggestion seemed reliable.",trust,trust
+TXT-017,"I compared the interest rates first.",price,price
+TXT-018,"This is how my family has always done it.",habit,habit
+TXT-019,"I did not have another reason.",other,price
+TXT-020,"I trusted the recommendation.",trust,other
