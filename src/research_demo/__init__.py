@@ -1,0 +1,1 @@
+"""Synthetic research infrastructure demo."""
