@@ -70,6 +70,8 @@ class APITests(unittest.TestCase):
     self.assertTrue(seen["url"].endswith("/api/v1/studies/"))
     self.assertEqual(seen["headers"]["Authorization"], "Token test-token")
     self.assertEqual(seen["body"]["total_available_places"], 5)
+    self.assertEqual(seen["body"]["reward"], 100)  # cents, not pounds/kroner
+    self.assertEqual(seen["body"]["completion_codes"][0]["code_type"], "COMPLETED")
     self.assertNotIn("publish", seen["body"])
 
 

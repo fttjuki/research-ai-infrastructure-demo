@@ -48,3 +48,9 @@ class ExperimentTests(unittest.TestCase):
             report = run_experiment(raw, Path(temp) / "processed")
             self.assertEqual(report["n_excluded"], 1)
             self.assertEqual(report["exclusion_counts_overlap_possible"]["no_consent"], 1)
+
+    def test_committed_raw_file_matches_manifest(self):
+        """The checked-in raw CSV must pass its own checksum, as users run it."""
+        with tempfile.TemporaryDirectory() as temp:
+            report = run_experiment(output_dir=Path(temp))
+            self.assertEqual(report["n_raw"], 60)

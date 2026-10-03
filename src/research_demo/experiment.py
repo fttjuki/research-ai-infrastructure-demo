@@ -48,7 +48,7 @@ def write_synthetic_raw(path: Path = RAW_CSV, *, n: int = 60, seed: int = 202610
     path.parent.mkdir(parents=True, exist_ok=True)
     rows = make_synthetic_participants(n=n, seed=seed)
     with path.open("w", newline="", encoding="utf-8") as stream:
-        writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(stream, fieldnames=list(rows[0]), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     checksum = hashlib.sha256(path.read_bytes()).hexdigest()
@@ -72,7 +72,7 @@ def _write_rows(path: Path, rows: list[dict[str, Any]]) -> None:
     if not rows:
         raise ValueError("There are no rows to write")
     with path.open("w", newline="", encoding="utf-8") as stream:
-        writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(stream, fieldnames=list(rows[0]), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 

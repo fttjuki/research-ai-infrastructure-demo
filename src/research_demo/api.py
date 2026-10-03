@@ -132,7 +132,17 @@ def create_prolific_draft(
         "prolific_id_option": "url_parameters",
         "total_available_places": 5,
         "estimated_completion_time": 2,
-        "reward": 1.0,
+        # Prolific expects the reward in cents of the account currency (100 = 1.00).
+        "reward": 100,
+        # Required by Prolific. Verify the schema against the current API docs
+        # before any live use; this demo only ever creates an unpublished draft.
+        "completion_codes": [
+            {
+                "code": "SYNTHDEMO",
+                "code_type": "COMPLETED",
+                "actions": [{"action": "MANUALLY_REVIEW"}],
+            }
+        ],
     }
     request = Request(
         "https://api.prolific.com/api/v1/studies/",
