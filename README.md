@@ -6,7 +6,7 @@ This portfolio demo uses **fictional data only** to show a small research workfl
 
 | Skill | Demo |
 |---|---|
-| Online experiment | Synthetic savings study: control, human-advice, and AI-advice groups; attention and time checks |
+| Online experiment | Synthetic savings study: control, human-advice, and AI-advice groups; attention and time checks; differences with 95% confidence intervals |
 | Reproducible research | Pre-analysis plan, codebook, frozen raw CSV, checksum, cleaning script, separate processed output |
 | LLM quality checking | Compare simulated model labels with human reference labels; report agreement, confusion matrix, and Cohen's kappa |
 | Batch reliability | Simulate 100 records, two temporary errors, checkpoint/resume, per-run limit, and a local estimated-budget stop |

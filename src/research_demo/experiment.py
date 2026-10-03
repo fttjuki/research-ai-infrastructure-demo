@@ -5,8 +5,10 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import math
 import random
 from collections import Counter
+from statistics import NormalDist
 from pathlib import Path
 from typing import Any
 
@@ -77,6 +79,68 @@ def _write_rows(path: Path, rows: list[dict[str, Any]]) -> None:
         writer.writerows(rows)
 
 
+def t_quantile(p: float, df: int) -> float:
+    """Approximate quantile of Student's t distribution (standard library only).
+
+    Uses the Cornish-Fisher expansion around the normal quantile. For p = 0.975
+    it matches statistical tables to about 0.0001 for df >= 6, which is ample
+    for reporting a 95% confidence interval.
+    """
+    if df < 6:
+        raise ValueError("t_quantile needs at least 6 degrees of freedom")
+    z = NormalDist().inv_cdf(p)
+    g1 = (z**3 + z) / 4
+    g2 = (5 * z**5 + 16 * z**3 + 3 * z) / 96
+    g3 = (3 * z**7 + 19 * z**5 + 17 * z**3 - 15 * z) / 384
+    g4 = (79 * z**9 + 776 * z**7 + 1482 * z**5 - 1920 * z**3 - 945 * z) / 92160
+    return z + g1 / df + g2 / df**2 + g3 / df**3 + g4 / df**4
+
+
+def ols_differences_with_ci(
+    values_by_arm: dict[str, list[int]], reference: str = "control", level: float = 0.95
+) -> dict[str, dict[str, float | int]]:
+    """Each arm minus the reference arm, with an OLS standard error and t-based CI.
+
+    This is the linear regression outcome ~ arm (reference = control) from the
+    pre-analysis plan, written out by hand: the residual variance is pooled over
+    all arms, so SE(arm - control) = sqrt(s2 * (1/n_arm + 1/n_control)) with
+    N - k degrees of freedom.
+    """
+    groups = {arm: list(values) for arm, values in values_by_arm.items()}
+    if any(len(values) < 2 for values in groups.values()):
+        raise ValueError("each arm needs at least two included observations")
+    means = {arm: sum(values) / len(values) for arm, values in groups.items()}
+    residual_ss = sum((x - means[arm]) ** 2 for arm, values in groups.items() for x in values)
+    n_total = sum(len(values) for values in groups.values())
+    df = n_total - len(groups)
+    pooled_variance = residual_ss / df
+    t_crit = t_quantile(1 - (1 - level) / 2, df)
+
+    results = {}
+    for arm, values in groups.items():
+        if arm == reference:
+            continue
+        difference = means[arm] - means[reference]
+        se = math.sqrt(pooled_variance * (1 / len(values) + 1 / len(groups[reference])))
+        results[f"{arm}_minus_{reference}"] = {
+            "difference": round(difference, 2),
+            "standard_error": round(se, 2),
+            "ci_lower": round(difference - t_crit * se, 2),
+            "ci_upper": round(difference + t_crit * se, 2),
+            "degrees_of_freedom": df,
+            "t_critical": round(t_crit, 4),
+        }
+    return results
+
+
+def _ci_or_reason(values_by_arm: dict[str, list[int]]) -> dict[str, Any]:
+    """Confidence intervals, or the reason they cannot be estimated (tiny samples)."""
+    try:
+        return ols_differences_with_ci(values_by_arm)
+    except ValueError as exc:
+        return {"not_estimable": str(exc)}
+
+
 def run_experiment(
     raw_path: Path = RAW_CSV,
     output_dir: Path = PROCESSED_DIR,
@@ -110,14 +174,17 @@ def run_experiment(
     included = [row for row in clean_rows if row["included"] == "yes"]
     group_summary: dict[str, dict[str, float | int]] = {}
     means: dict[str, float] = {}
+    values_by_arm: dict[str, list[int]] = {}
     for arm in ARMS:
         values = [int(row["saved_nok"]) for row in included if row["arm"] == arm]
+        values_by_arm[arm] = values
         mean = round(sum(values) / len(values), 2) if values else 0.0
         means[arm] = mean
         group_summary[arm] = {"n": len(values), "mean_saved_nok": mean}
 
     # With a categorical arm and control as the reference, OLS point estimates
-    # equal group means and the two differences shown here. No p-values are implied.
+    # equal the differences in group means. The 95% CIs use the pooled residual
+    # variance from that regression (amendment 1 in docs/preregistration.md).
     summary = {
         "study": "Fictional savings experiment; synthetic data only",
         "raw_file_sha256": raw_sha256,
@@ -131,6 +198,7 @@ def run_experiment(
             "human_minus_control": round(means["human"] - means["control"], 2),
             "ai_minus_control": round(means["ai"] - means["control"], 2),
         },
+        "ols_differences_vs_control_95ci": _ci_or_reason(values_by_arm),
         "interpretation_note": "Synthetic demonstration only; estimates are not evidence about real people.",
     }
     output_dir = Path(output_dir)

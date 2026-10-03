@@ -37,6 +37,12 @@ Report the number of included observations and mean `saved_nok` in each arm. Est
 
 This compact demo does not calculate standard errors, confidence intervals, or p-values. It does not support conclusions about real participants.
 
+### Amendment 1 (3 October 2026): add 95% confidence intervals
+
+The original plan above reported point estimates only. This amendment adds, for `human - control` and `ai - control`, the OLS standard error and a 95% confidence interval from the same linear regression: residual variance pooled over the three arms, N - 3 degrees of freedom, and a t critical value. The hypothesis, outcome, exclusions, and point estimates are unchanged, and no p-values are added.
+
+The original text is kept rather than edited, so the change stays visible. In a real study, an amendment like this should be dated and registered before the outcome data are inspected, or reported in the paper as a deviation from the plan.
+
 ## Reproducibility
 
 - Keep the raw synthetic CSV unchanged; its SHA-256 checksum is in `data/raw/manifest.json`.

@@ -27,5 +27,23 @@
     "human_minus_control": -1.11,
     "ai_minus_control": 114.97
   },
+  "ols_differences_vs_control_95ci": {
+    "human_minus_control": {
+      "difference": -1.12,
+      "standard_error": 47.79,
+      "ci_lower": -97.11,
+      "ci_upper": 94.87,
+      "degrees_of_freedom": 50,
+      "t_critical": 2.0086
+    },
+    "ai_minus_control": {
+      "difference": 114.97,
+      "standard_error": 46.52,
+      "ci_lower": 21.54,
+      "ci_upper": 208.4,
+      "degrees_of_freedom": 50,
+      "t_critical": 2.0086
+    }
+  },
   "interpretation_note": "Synthetic demonstration only; estimates are not evidence about real people."
 }
